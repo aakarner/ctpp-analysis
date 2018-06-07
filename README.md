@@ -1,9 +1,8 @@
 # ctpp-analysis
-Analyze the 2006-2010 five-year Census Transportation Planning Package using R and MonetDBLite
 
 The 2006-2010 Census Transportation Planning Package (CTPP) is a special tabulation of five-year American Community Survey (ACS) data. 
 
-Raw CTPP data can be downloaded here for the entire US or at the state-level: ftp://data5.ctpp.transportation.org/
+Raw CTPP data can be downloaded here for the entire US or at the state-level: [ftp://data5.ctpp.transportation.org/]
 
 Documentation is sparse. I'll share what I've learned here. 
 
