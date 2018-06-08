@@ -11,27 +11,26 @@ In general, the data files are all in long format. Each row describes an observa
 For a single state (Texas, in this case), the directory structure is as follows:
 
 ```
-project
-│   README.md
-│   file001.txt    
-│
-└───folder1
-│   │   file011.txt
-│   │   file012.txt
-│   │
-│   └───subfolder1
-│       │   file111.txt
-│       │   file112.txt
-│       │   ...
-│   
-└───folder2
-    │   file021.txt
-    │   file022.txt
+TX
+└───48
+│   │   TX_2006thru2010_A101100.csv
+│   │   TX_2006thru2010_A101101.csv
+│   │   TX_2006thru2010_A101102.csv
+│   │   ...
+│   │   TX_2006thru2010_B309201.csv
+
 ```
 
-The 2006-2010_ctpp_lookup.tar.gz file is important. It contains a number of lookup tables, including:
+Understanding the contents of each table within the state directory requires using the 2006-2010_ctpp_lookup.tar.gz file. It's quite important and contains a number of lookup tables, including:
 * ReadMe.xlsx
-* 2006-2010_CTPP_Documentation for AASHTO-Oct 22 2013.xlsx: This file contains information identifying the content of each table 
+* 2006-2010_CTPP_Documentation for AASHTO-Oct 22 2013.xlsx: This file contains information identifying the content of each table listed within the state directory and providing further instructions for data access. In contains a number of worksheets:
+  ** Part1Tables
+  ** Part2Tables
+  ** Part3Tables
+  **Geog
+  **Geoids
+  **Universes
+  **Variables
 * Keys to Map Lookup Files to Data.docx
 * Formula to Calculate Margins of Error for Zero Estimates by DSSD.docx
 
@@ -44,7 +43,7 @@ I'm still trying to work out what's included in the flow lookup table, but the p
 
 # CTPP structure
 
-The CTPP consists of three "parts": 
+The CTPP consists of three "parts." Understanding the data that underlie each part is key to understanding the CTPP: 
 * Part 1 summarizes information about commuters at their place of residence (i.e. commute trip origins). It can answer questions like "What share of commuters ?"
 * Part 2 summarizes information about commuters at their place of work (i.e. commute trip destinations). It can answer questions like "What share of commuters arriving in a particular county drive alone to work?"
 * Part 3 summarizes flows of commuters between oriigns and destinations. 
