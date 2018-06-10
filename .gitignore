@@ -42,9 +42,9 @@ monet_ctpp
 lookup_tables
 
 # .csv files - for the CTPP, these will often exceed 100 mb
-.csv
+*.csv
 test_data
 
 # other data files
-.accdb
-.zip
+*.accdb
+*.zip
