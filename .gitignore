@@ -16,6 +16,7 @@
 
 # RStudio files
 .Rproj.user/
+*.Rproj
 
 # produced vignettes
 vignettes/*.html
@@ -43,8 +44,9 @@ lookup_tables/
 
 # .csv files - for the CTPP, these will often exceed 100 mb
 *.csv
-test_data/
+data/
 
 # other data files
 *.accdb
 *.zip
+.Rproj.user
