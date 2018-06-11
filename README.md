@@ -1,3 +1,9 @@
+# Table of Contents
+1. [Overview](#Overview)
+2. [The data](#The-data)
+3. [The scripts](#The-scripts)
+4. [To-do](#To-do)
+
 # Overview
 
 The 2006-2010 Census Transportation Planning Package (CTPP) is a special tabulation of five-year American Community Survey (ACS) data. It consists of three "parts." Understanding the data that underlie each part is key to understanding the CTPP: 
@@ -7,7 +13,7 @@ The 2006-2010 Census Transportation Planning Package (CTPP) is a special tabulat
 
 Raw CTPP data can be downloaded here for the entire US or at the state-level: [ftp://data5.ctpp.transportation.org/](ftp://data5.ctpp.transportation.org/)
 
-# The data
+# Data
 
 Documentation is sparse. I'll share what I've learned here. 
 
@@ -38,16 +44,24 @@ Understanding the contents of each table within the state directory requires usi
   * Variables: Describes the factor levels used for all categorical variables.
 * **Keys to Map Lookup Files to Data.docx**
 * **Formula to Calculate Margins of Error for Zero Estimates by DSSD.docx**
-
+  
 The data tables within each part contain consistent headings. 
 
 The following text files are all pipe-delimited (y tho?):
 
 * **acs_2006thru2010_ctpp_table_shell.txt**: This file includes variable names cross-referenced using the table name (TBLID) and line number (LINENO).
-* **acs_2006thru2010_ctpp_flow_geo.txt**: This file includes a single GEOID column. Near as I can tell, it includes every *possible* flow between all units of geography for which flows are defined  (see the "Geog" worksheet in 2006-2010_CTPP_Documentation for AASHTO-Oct 22 2013.xlsx). This means that a row is included even if there's no observed commuter flow.
+* **acs_2006thru2010_ctpp_flow_geo.txt**: This file includes a single GEOID column. Near as I can tell, it includes every *possible* flow between all units of geography for which flows are defined (see the "Geog" worksheet in 2006-2010_CTPP_Documentation for AASHTO-Oct 22 2013.xlsx). This means that a row is included even if there's no observed commuter flow.
 * **acs_2006thru2010_ctpp_res_geo.txt**
 * **acs_2006thru2010_ctpp_pow_geo.txt**
 
 I'm still trying to work out what's included in the flow lookup table, but the place-of-work and place-of-residence lookups seem to be what you'd expect -- a GEOID cross-referenced with its higher-level geographic information. 
 
+# Scripts
+In general, the CTPP data tables are not that large, so a database probably isn't necessary for most analyses. But some of the flow tables are >2 gb, so to make the scripts general enough to cover all analytical possibilities, all data are read into a MonetDBLite database in the first script. Later scripts read necessary subsets into R to perform analysis.
 
+* **01-create-database.R**: Create MonetDB database and populate it with all necessary tables.
+* **02-analysis-part1.R**: Toy analysis demonstrating how CTPP Part 1 data can be extracted from the database and visualized.
+* **03-analysis-part3.R**: Use iterative proportional fitting to create synthetic tract-level flow tables stratified by mode and race/ethnicity.
+
+# To-do
+1. Consider uncertainty (collect and report margins of error)
