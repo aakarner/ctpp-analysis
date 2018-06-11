@@ -2,6 +2,11 @@ library(DBI)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(tigris)
+
+# Connect to the local MonetDB database
+dbdir <- "monet_ctpp"
+con <- dbConnect(MonetDBLite::MonetDBLite(), dbdir)
 
 harris_res <- dbGetQuery(con, "SELECT * FROM harrisres")
 
@@ -23,7 +28,6 @@ harris_res_wide <- harris_res %>%
          dashare = da / total,
          transhare = transit / total)
 
-
 # Retreive Harris county tracts from tigris
 tracts_harris <- tracts("TX", county = "201")
 
@@ -33,3 +37,5 @@ tracts_wgeo <- inner_join(tracts_harris, harris_res_wide,
 
 ggplot() + geom_sf(data = tracts_wgeo, aes(fill = transhare))
 ggplot() + geom_sf(data = tracts_wgeo, aes(fill = dashare)) + coord_sf(crs = st_crs(2278))
+
+dbDisconnect(con, shutdown = TRUE)

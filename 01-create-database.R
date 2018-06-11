@@ -1,8 +1,6 @@
 library(DBI)
 library(MonetDBLite)
 library(readr)
-library(tigris)
-library(ggplot2)
 library(tidyr)
 library(dplyr)
 library(sf)
@@ -11,7 +9,12 @@ library(sf)
 dbdir <- "monet_ctpp"
 con <- dbConnect(MonetDBLite::MonetDBLite(), dbdir)
 
-# Read in lookup tables
+# Required lookup tables -------------------------------------------------------
+
+# monetdb.read.csv() doesn't work directly with these lookup table files 
+# due to an encoding issue. Best solution is to read them first into R and then
+# into the database using dbWriteTable().
+
 lookup_res <- read_delim("lookup tables/acs_2006thru2010_ctpp_res_geo.txt",
                          delim = "|",
                          guess_max = 200000)
@@ -38,9 +41,10 @@ dbWriteTable(con, "lookupres", lookup_res)
 dbWriteTable(con, "lookuppow", lookup_pow)
 dbWriteTable(con, "tableshell", table_shell)
 
-# Example analyses -------------------------------------------------------------
+# Required tables for Part 1 - Place of residence ------------------------------
 
-# PART 1 - Place of residence --------------------------------------------------
+# Part 1 tables can generally be read directly into the database using 
+# monetdb.read.csv().
 
 # Table A102106 - Means of transportation
 monetdb.read.csv(con, 
@@ -49,48 +53,68 @@ monetdb.read.csv(con,
                  nrow.check = 200000,
                  lower.case.names = TRUE)
 
+# This commented chunk below could be used to generate a table in the databse
+# representing a subset of desire geographies. 
+# Most of the subsets will be small, though, and can be created as needed 
+# on the fly with appropriate queries and data wrangling techniques.
+
 # Get required subset of the residential geography crosswalk
-dbSendQuery(
-  con, "
-  CREATE TABLE harrisres AS
-  SELECT lookupres.geoid, st, cty, tr, lineno, est, se FROM a102106
-  INNER JOIN lookupres ON
-  a102106.geoid = lookupres.geoid
-  WHERE sumlevel = 'C11' AND
-  st = '48' AND
-  cty = '201'")
-
-# Create a standard census geoid
-dbSendQuery(
-  con, "
-  ALTER TABLE harrisres
-  ADD COLUMN geoid10 char(11)")
-
-dbSendQuery(
-  con, "
-  UPDATE harrisres
-  SET geoid10 = st || cty || tr") # Double pipe concatenates multiple strings
-
+# To extract rows for Harris County, TX
+# dbSendQuery(
+#   con, "
+#   CREATE TABLE harrisres AS
+#   SELECT lookupres.geoid, st, cty, tr, lineno, est, se FROM a102106
+#   INNER JOIN lookupres ON
+#   a102106.geoid = lookupres.geoid
+#   WHERE sumlevel = 'C11' AND
+#   st = '48' AND
+#   cty = '201'")
+# 
+# # Create a standard census geoid
+# dbSendQuery(
+#   con, "
+#   ALTER TABLE harrisres
+#   ADD COLUMN geoid10 char(11)")
+# 
+# dbSendQuery(
+#   con, "
+#   UPDATE harrisres
+#   SET geoid10 = st || cty || tr") # Double pipe concatenates multiple strings
+# 
 # dbRemoveTable(con, "harrisres")
 # dbGetQuery(con, "SELECT * FROM harrisres LIMIT 15")
 
+# Table B102201 - Minority status by means of transportation (most detailed)
+b102201 <- read_csv("data/TX_2006thru2010_B102201.csv")
+names(b102201) <- tolower(names(b102201))
 
-# Part 3 - Flow ----------------------------------------------------------------
+dbWriteTable(con, "b102201", b102201)
+rm(b102201)
 
-# Goal of this section is to create synthetic journey-to-work flows 
-# by mode cross-tabulated with race/ethnicity
+# Required tables for Part 2 - Place of work -----------------------------------
+
+# Table B202200 - Minority status by means of transportation (most detailed)
+b202200 <- read_csv("data/TX_2006thru2010_B202200.csv")
+names(b202200) <- tolower(names(b202200))
+
+dbWriteTable(con, "b202200", b202200)
+rm(b202200)
+
+# Required tables for Part 3 - Flow --------------------------------------------
+
+# Part 3 tables cannot be read directly into the database using 
+# monetdb.read.csv(). The "source" column throws an error because it contains 
+# text in the final row. In general that column seems a little strange. 
+
+# Instead, read required tables directly into R and use dbWriteTable() instead.
 
 # Table A302103 - Means of transportation
 # Table B302105 - Minority status
 table_names <- c("a302103", "b302105")
 
-# monetdb.read.csv() doesn't work with this file - the "source" column 
-# throws an error because it contains text in the final row. 
-# In general that column seems a little strange. 
 a302103 <- read_csv("data/TX_2006thru2010_A302103.csv")
 names(a302103) <- tolower(names(a302103))
 dbWriteTable(con, "a302103", a302103)
-
 
 b302105 <- read_csv("data/TX_2006thru2010_B302105.csv")
 names(b302105) <- tolower(names(b302105))
@@ -147,43 +171,5 @@ rm(b302105)
 # dbRemoveTable(con, "a302103_tract")
 # dbRemoveTable(con, "b302105")
 # dbRemoveTable(con, "b302105_tract")
-
-
-
-# Create a data frame with flows by mode
-flows_mode_tr <- dbGetQuery(con, "SELECT * FROM a302103_tract")
-
-flows_mode_tr <- flows_mode_tr %>%
-  select(geoid, origin, destination, lineno, est) %>%
-  spread(lineno, est, fill = 0) %>%
- `colnames<-`(c("geoid", "origin", "destination", 
-                "total", "da", "cp2", "cp3", "cp4", "cp56", "cp7p", 
-                "bus", "streetcar", "subway", "railroad", "ferry", "bike", 
-                "walk", "taxi", "motorcycle", "other", "telecommute")) %>%
-  mutate(carpool = cp2 + cp3 + cp4 + cp56 + cp7p,
-         transit = bus + streetcar + subway,
-         dashare = da / total,
-         transhare = transit / total)
-
-
-flows_minority_tr <- dbGetQuery(con, "SELECT * FROM b302105_tract")
-
-# Get "lineno" information from the table shell
-# minority_names <- dbGetQuery(
-#   con, "
-#   SELECT * FROM tableshell 
-#   WHERE tblid = 'B302105'")
-
-flows_minority_tr <- flows_minority_tr %>%
-  select(geoid, origin, destination, lineno, est) %>%
-  spread(lineno, est, fill = 0) %>%
- `colnames<-`(c("geoid", "origin", "destination", 
-                "total", "white_alone", "other")) %>%
-  mutate(white_share = white_alone / total,
-         poc_share = other / total) # It looks like 'other' is poc
-
-# Join the mode share and minority status data to generate synthetic flows
-flows_mode_minority <- 
-  inner_join(flows_mode_tr, flows_minority_tr, by = c("geoid"))
 
 dbDisconnect(con, shutdown = TRUE)
