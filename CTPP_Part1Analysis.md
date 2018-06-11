@@ -3,30 +3,59 @@ CTPP\_Part1Analysis
 Alex Karner
 June 10, 2018
 
-R Markdown
-----------
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+This markdown file demonstrates how to conduct a basic analysis of mode share at the tract level using CTPP Part 1 data. You must first have downloaded the necessary data and created a MonetDB database using MonetDBLite.
 
 ``` r
-summary(cars)
+library(DBI)
+library(ggplot2)
+library(dplyr)
+library(tigris)
+library(tidyr)
 ```
 
-    ##      speed           dist       
-    ##  Min.   : 4.0   Min.   :  2.00  
-    ##  1st Qu.:12.0   1st Qu.: 26.00  
-    ##  Median :15.0   Median : 36.00  
-    ##  Mean   :15.4   Mean   : 42.98  
-    ##  3rd Qu.:19.0   3rd Qu.: 56.00  
-    ##  Max.   :25.0   Max.   :120.00
+Table A102106 - Means of transportation
+=======================================
 
-Including Plots
----------------
+Extract data for Harris County, TX
+----------------------------------
 
-You can also embed plots, for example:
+``` r
+# Connect to the MonetDB database containing CTPP data
+dbdir <- "monet_ctpp"
+con <- dbConnect(MonetDBLite::MonetDBLite(), dbdir)
 
-![](CTPP_Part1Analysis_files/figure-markdown_github/pressure-1.png)
+harris_res <- dbGetQuery(con, "SELECT * FROM harrisres")
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# https://stackoverflow.com/questions/28100780/use-with-replacement-functions-like-colnames
+harris_res_wide <- harris_res %>%
+  select(geoid10, lineno, est) %>%
+  spread(lineno, est, fill = 0) %>%
+   `colnames<-`(c("geoid10", "total", "da", "cp2", "cp3", "cp4", "cp56", "cp7p", 
+             "bus", "streetcar", "subway", "railroad", "ferry", "bike", "walk",
+             "taxi", "motorcycle", "other", "telecommute")) %>%
+  mutate(carpool = cp2 + cp3 + cp4 + cp56 + cp7p,
+         transit = bus + streetcar + subway,
+         dashare = da / total,
+         transhare = transit / total)
+```
+
+    ## Warning: package 'bindrcpp' was built under R version 3.4.4
+
+The Harris County data can subsequently be combined with spatial data from the census to map patterns of public transit use, e.g.
+
+``` r
+# Retreive Harris county tracts from tigris
+tracts_harris <- tracts("TX", county = "201")
+
+# Join and map part 1 data 
+tracts_wgeo <- inner_join(tracts_harris, harris_res_wide,
+                            by = c("GEOID" = "geoid10"))
+
+ggplot() + geom_sf(data = tracts_wgeo, aes(fill = transhare))
+```
+
+![](CTPP_Part1Analysis_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+``` r
+dbDisconnect(con, shutdown = TRUE)
+```
