@@ -18,11 +18,11 @@ For a single state (Texas, in this case), the directory structure is as follows:
 ```
 TX
 └───48
-│   │   TX_2006thru2010_A101100.csv
-│   │   TX_2006thru2010_A101101.csv
-│   │   TX_2006thru2010_A101102.csv
-│   │   ...
-│   │   TX_2006thru2010_B309201.csv
+    │   TX_2006thru2010_A101100.csv
+    │   TX_2006thru2010_A101101.csv
+    │   TX_2006thru2010_A101102.csv
+    │   ...
+    │   TX_2006thru2010_B309201.csv
 
 ```
 
@@ -39,7 +39,7 @@ Understanding the contents of each table within the state directory requires usi
 * **Keys to Map Lookup Files to Data.docx**
 * **Formula to Calculate Margins of Error for Zero Estimates by DSSD.docx**
 
-The data tables within each part contain consistent headings. These are descirbed in 
+The data tables within each part contain consistent headings. 
 
 The following text files are all pipe-delimited (y tho?):
 
