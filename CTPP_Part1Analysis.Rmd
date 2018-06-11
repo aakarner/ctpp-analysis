@@ -2,7 +2,7 @@
 title: "CTPP_Part1Analysis"
 author: "Alex Karner"
 date: "June 10, 2018"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
