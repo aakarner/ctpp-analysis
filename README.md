@@ -1,13 +1,13 @@
-# ctpp-analysis
+# Overview
 
-The 2006-2010 Census Transportation Planning Package (CTPP) is a special tabulation of five-year American Community Survey (ACS) data. 
-
-The CTPP consists of three "parts." Understanding the data that underlie each part is key to understanding the CTPP: 
+The 2006-2010 Census Transportation Planning Package (CTPP) is a special tabulation of five-year American Community Survey (ACS) data. It consists of three "parts." Understanding the data that underlie each part is key to understanding the CTPP: 
 * Part 1 summarizes information about commuters at their place of residence (i.e. commute trip origins). It can answer questions like "What share of commuters ?"
 * Part 2 summarizes information about commuters at their place of work (i.e. commute trip destinations). It can answer questions like "What share of commuters arriving in a particular county drive alone to work?"
 * Part 3 summarizes flows of commuters between oriigns and destinations. 
 
 Raw CTPP data can be downloaded here for the entire US or at the state-level: [ftp://data5.ctpp.transportation.org/](ftp://data5.ctpp.transportation.org/)
+
+# The data
 
 Documentation is sparse. I'll share what I've learned here. 
 
