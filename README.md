@@ -2,6 +2,11 @@
 
 The 2006-2010 Census Transportation Planning Package (CTPP) is a special tabulation of five-year American Community Survey (ACS) data. 
 
+The CTPP consists of three "parts." Understanding the data that underlie each part is key to understanding the CTPP: 
+* Part 1 summarizes information about commuters at their place of residence (i.e. commute trip origins). It can answer questions like "What share of commuters ?"
+* Part 2 summarizes information about commuters at their place of work (i.e. commute trip destinations). It can answer questions like "What share of commuters arriving in a particular county drive alone to work?"
+* Part 3 summarizes flows of commuters between oriigns and destinations. 
+
 Raw CTPP data can be downloaded here for the entire US or at the state-level: [ftp://data5.ctpp.transportation.org/](ftp://data5.ctpp.transportation.org/)
 
 Documentation is sparse. I'll share what I've learned here. 
@@ -34,6 +39,8 @@ Understanding the contents of each table within the state directory requires usi
 * **Keys to Map Lookup Files to Data.docx**
 * **Formula to Calculate Margins of Error for Zero Estimates by DSSD.docx**
 
+The data tables within each part contain consistent headings. These are descirbed in 
+
 The following text files are all pipe-delimited (y tho?):
 
 * **acs_2006thru2010_ctpp_table_shell.txt**: This file includes variable names cross-referenced using the table name (TBLID) and line number (LINENO).
@@ -43,11 +50,4 @@ The following text files are all pipe-delimited (y tho?):
 
 I'm still trying to work out what's included in the flow lookup table, but the place-of-work and place-of-residence lookups seem to be what you'd expect -- a GEOID cross-referenced with its higher-level geographic information. 
 
-# CTPP structure
 
-The CTPP consists of three "parts." Understanding the data that underlie each part is key to understanding the CTPP: 
-* Part 1 summarizes information about commuters at their place of residence (i.e. commute trip origins). It can answer questions like "What share of commuters ?"
-* Part 2 summarizes information about commuters at their place of work (i.e. commute trip destinations). It can answer questions like "What share of commuters arriving in a particular county drive alone to work?"
-* Part 3 summarizes flows of commuters between oriigns and destinations. 
-
-Different cross-tabulations of 
