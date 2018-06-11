@@ -1,35 +1,15 @@
----
-title: "CTPP_Part1Analysis"
-author: "Alex Karner"
-date: "June 10, 2018"
-output: github_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-This markdown file demonstrates how to conduct a basic analysis of mode share
-at the tract level using CTPP Part 1 data. You must first have downloaded the 
-necessary data and created a MonetDB database using MonetDBLite. 
-
-```{r warning = FALSE, message = FALSE}
 library(DBI)
 library(ggplot2)
 library(dplyr)
-library(tigris)
 library(tidyr)
-```
-
-# Table A102106 - Means of transportation
-## Extract data for Harris County, TX
-
-```{r}
-# Connect to the MonetDB database containing CTPP data
-dbdir <- "monet_ctpp"
-con <- dbConnect(MonetDBLite::MonetDBLite(), dbdir)
 
 harris_res <- dbGetQuery(con, "SELECT * FROM harrisres")
+
+# Get "lineno" information from the table shell
+mode_shares_res <- dbGetQuery(
+  con, "
+  SELECT * FROM tableshell 
+  WHERE tblid = 'A102106'")
 
 # https://stackoverflow.com/questions/28100780/use-with-replacement-functions-like-colnames
 harris_res_wide <- harris_res %>%
@@ -42,12 +22,8 @@ harris_res_wide <- harris_res %>%
          transit = bus + streetcar + subway,
          dashare = da / total,
          transhare = transit / total)
-```
 
-The Harris County data can subsequently be combined with spatial data from
-the census to map patterns of public transit use, e.g.
 
-```{r}
 # Retreive Harris county tracts from tigris
 tracts_harris <- tracts("TX", county = "201")
 
@@ -56,8 +32,4 @@ tracts_wgeo <- inner_join(tracts_harris, harris_res_wide,
                             by = c("GEOID" = "geoid10"))
 
 ggplot() + geom_sf(data = tracts_wgeo, aes(fill = transhare))
-
-dbDisconnect(con, shutdown = TRUE)
-```
-
-
+ggplot() + geom_sf(data = tracts_wgeo, aes(fill = dashare)) + coord_sf(crs = st_crs(2278))
