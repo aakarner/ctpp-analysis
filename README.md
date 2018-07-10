@@ -7,7 +7,7 @@
 # Overview
 
 The 2006-2010 Census Transportation Planning Package (CTPP) is a special tabulation of five-year American Community Survey (ACS) data. It consists of three "parts." Understanding the data that underlie each part is key to understanding the CTPP: 
-* Part 1 summarizes information about commuters at their place of residence (i.e. commute trip origins). It can answer questions like "What share of commuters ?"
+* Part 1 summarizes information about commuters at their place of residence (i.e. commute trip origins). It can answer questions like "What share of commuters originating in a particular county use public transit?"
 * Part 2 summarizes information about commuters at their place of work (i.e. commute trip destinations). It can answer questions like "What share of commuters arriving in a particular county drive alone to work?"
 * Part 3 summarizes flows of commuters between oriigns and destinations. 
 
@@ -61,7 +61,7 @@ In general, the CTPP data tables are not that large, so a database probably isn'
 
 * **01-create-database.R**: Create MonetDB database and populate it with all necessary tables.
 * **02-analysis-part1.R**: Toy analysis demonstrating how CTPP Part 1 data can be extracted from the database and visualized.
-* **03-analysis-part3.R**: Use iterative proportional fitting to create synthetic tract-level flow tables stratified by mode and race/ethnicity.
+* **03-analysis-part3.R**: Use iterative proportional fitting to create synthetic tract-level flow tables stratified by mode and race/ethnicity. The CTPP Part 3 does not contain a flow table cross-tabbed by race and mode. Here, we begin with the Part 3 flow table by mode, make an initial assumption to split it into white/non-white for each mode based on the regional share of commuters using each mode
 
 # To-do
 1. Consider uncertainty (collect and report margins of error)
