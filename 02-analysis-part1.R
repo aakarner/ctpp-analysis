@@ -4,7 +4,7 @@ library(dplyr)
 library(tidyr)
 library(tigris)
 
-# Connect to the local MonetDB database
+# Connect to the local MonetDB
 dbdir <- "monet_ctpp"
 con <- dbConnect(MonetDBLite::MonetDBLite(), dbdir)
 

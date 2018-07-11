@@ -128,11 +128,14 @@ seed <- array(c(flows_da_mtx * 0.76,
 
 source("00-function-definitions.R")
 
+# Look at using mipfp instead.
+# Examples here: https://spatial-microsim-book.robinlovelace.net/smsim-in-r
+
 ipf <- ipf3df(row_control_mtx, col_control_mtx, flows_da_mtx, seed,
               maxiter = 5000)
 
 write_csv(row_control, "rows.csv")
 write_csv(col_control, "cols.csv")
-write_csv(flows_da, "stack.csv")
+write_csv(flows_da_df, "stack.csv")
 
 dbDisconnect(con, shutdown = TRUE)
