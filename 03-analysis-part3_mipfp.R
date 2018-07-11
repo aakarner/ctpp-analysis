@@ -68,7 +68,7 @@ flows_mode_tr <- dbGetQuery(con, "SELECT * FROM a302103_tract") %>%
 
 # The above call will give me all origins that have a destination bound for 
 # H-GAC -- this could include origins that lie outside of the region. 
-# 
+
 
 # The minority-specific flows generated in the chunk below could be used 
 # to split the flows by mode, assuming that the share of white/poc 
@@ -105,7 +105,7 @@ res_mode_minority <- dbGetQuery(
   INNER JOIN lookupres ON
   b102201.geoid = lookupres.geoid
   WHERE sumlevel = 'C11' AND
-  cty IN (", paste0(houston_counties, collapse = ","), ")"))
+  cty IN (", paste0("'", paste0(houston_counties, collapse = "','"), "'"), ")"))
 
 # Flows into a specific county or counties
 pow_mode_minority <- dbGetQuery(
@@ -117,7 +117,7 @@ pow_mode_minority <- dbGetQuery(
   b202200.geoid = lookuppow.geoid
   WHERE sumlevel = 'C31' AND
   st = '48' AND 
-  cty IN (", paste0(houston_counties, collapse = ","), ")"))
+  cty IN (", paste0("'", paste0(houston_counties, collapse = "','"), "'"), ")"))
 
 # Flows into the entire state
 # pow_mode_minority <- dbGetQuery(
@@ -193,12 +193,6 @@ pow_mode_minority %>%
   summarize(total = sum(est))
 
 
-
-# Do I actually have to create a new flow table using the controls from Part 1 and 2?
-# If yes, this would just be a 2D contingency table...
-# Wouldn't I still want to control to the total number of trips...?
-# No, because each individual trip total would be controlled. 
-
 # Create control totals
 # Some of these might have no rows returned so they'll need to be populated
 # with zeros -- use fill = 0 in spread()
@@ -222,28 +216,6 @@ col_control <- pow_mode_minority %>%
   filter(lineno %in% c(13, 24) & geoid10 %in% flows_da$destination) %>%
   select(geoid10, lineno, est) %>%
   spread(lineno, est, fill = 0)
-
-
-
-
-
-col_control_mtx <- t(data.matrix(row_control[, -1])) * 2175 / 2220
-
-sum(col_control$`13`)
-sum(col_control$`24`)
-sum(row_control$`13`)
-sum(row_control$`24`)
-
-
-
-seed <- array(1, c(39, 6, 2))
-
-# list of dimensions of each marginal constrain
-tgt.data.3d <- list(row_control_dummy, col_control_dummy, flows_da_mtx)
-# storing the description of target data in a list
-tgt.list.3d <- list( 1, 2, 3)
-# calling the Ipfp function
-res.3d <- Ipfp(seed, tgt.list.3d, tgt.data.3d, iter=50, print=TRUE, tol=1e-5)
 
 
 dbDisconnect(con, shutdown = TRUE)
