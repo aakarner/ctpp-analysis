@@ -95,7 +95,10 @@ odmtx <- expand.grid(
        destinations = centroids_final$latlong),
        stringsAsFactors = FALSE)
 
-total <- nrow(odmtx) # set number of records
+odmtx <- odmtx[1:10,]
+
+
+total <- nrow(odmtx) * length(times) # set number of records
 pb <- progress_bar$new(total = total, format = "(:spin) [:bar] :percent") #progress bar
 
 # API parameters here: 
@@ -143,6 +146,6 @@ for(i in 1:length(times)) {
     # record error
     odmtx[j, "status"] <- response$errorId}
   }
-  
-  dbWriteTable(skimdb, beforeskims, odmtx, append = TRUE)
+  odmtx$timeslice <- times[j]
+  dbWriteTable(skimdb, "beforeskims", odmtx, append = TRUE)
 }
