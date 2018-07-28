@@ -101,31 +101,48 @@ pb <- progress_bar$new(total = total, format = "(:spin) [:bar] :percent") #progr
 # API parameters here: 
 # http://dev.opentripplanner.org/apidoc/1.0.0/resource_PlannerResource.html
 
+# Connect to the postgres database to store skims
+skimdb <- dbConnect(
+    drv = RPostgreSQL::PostgreSQL(),
+    dbname = "houstontransit",
+    host = "localhost",
+    user = "alexk",
+    password = "JLpIw45")
+
+
+
 # Begin the for loop  
-for (i in 1:total) {
+times <- paste0(strftime(seq(ISOdatetime(2015,9,1,6,30,0), 
+             by = "min", 
+             length.out = 120), format = "%H:%M"), "am")
+
+for(i in 1:length(times)) {
+  for (j in 1:total) {
   pb$tick()   # update progress bar
   
   response <-
     otpTripTime(
       before,
-      from = odmtx[i, ]$origins,
-      to = odmtx[i, ]$destinations,
+      from = odmtx[j, ]$origins,
+      to = odmtx[j, ]$destinations,
       modes = 'WALK,TRANSIT',
       detail = TRUE,
       date = '2015-08-04',
-      time = '08:00am',
+      time = times[i],
       maxWalkDistance = "3000", # allows 1500m at both ends of journey
       walkReluctance = "2",
       minTransferTime = "600"
     )
   # If response is OK update dataframe
   if (response$errorId == "OK") {
-    odmtx[i, "status"] <- response$errorId
-    odmtx[i, "duration"] <- response$itineraries$duration
-    odmtx[i, "waitingtime"] <- response$itineraries$waitingTime
-    odmtx[i, "transfers"] <-response$itineraries$transfers
+    odmtx[j, "status"] <- response$errorId
+    odmtx[j, "duration"] <- response$itineraries$duration
+    odmtx[j, "waitingtime"] <- response$itineraries$waitingTime
+    odmtx[j, "transfers"] <-response$itineraries$transfers
   } else {
     # record error
-    odmtx[i, "status"] <- response$errorId
+    odmtx[j, "status"] <- response$errorId}
   }
+  
+  dbWriteTable(skimdb, beforeskims, odmtx, append = TRUE)
 }
