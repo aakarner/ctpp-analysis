@@ -5,6 +5,10 @@ library(DBI)
 library(dplyr)
 library(tidyr)
 library(progress)
+library(trread)
+library(gtsf)
+library(sf)
+library(ggplot2)
 
 # Load the OTP API functions
 source("src/otp-api-fn.R")
@@ -48,13 +52,47 @@ after <- otpConnect(
   port = "8085",
   ssl = "false")
 
-centroids <- as.data.frame(st_coordinates(st_centroid(harris_tracts)))
-centroids <- cbind(geoid10 = harris_tracts$geoid10, centroids)
+# Only consider tract centroids that are located within a half mile of transit
+metroPost <- 
+  import_gtfs("D:/Dropbox/Work/FTA connectivity/data/GTFS/20150818_htx.zip",
+                         local = TRUE)
+metroPost <- gtfs_as_sf(metroPost)
+metroPostsf <- st_transform(metroPost$sf_routes, "+init=epsg:3673") # http://spatialreference.org/ref/epsg/3673/
+
+metroPre <- import_gtfs("D:/Dropbox/Work/FTA connectivity/data/GTFS/20150517_htx.zip",
+                         local = TRUE)
+metroPre <- gtfs_as_sf(metroPre) 
+metroPresf <- st_transform(metroPost$sf_routes, "+init=epsg:3673") # http://spatialreference.org/ref/epsg/3673/
+
+metroAll <- rbind(metroPostsf, metroPresf)
+
+metroBuff <- metroAll %>%
+  st_buffer(805)
+
+
+summarize(metroBuff)
+
+ggplot() + geom_sf(data = harris_tracts) + geom_sf(data = metroBuff)
+
+# Select tract 
+
+centroids <- harris_tracts %>%
+  st_transform("+init=epsg:3673") %>%
+  st_centroid()
+
+centroids <- centroids[st_within(centroids, metroBuff) %>% lengths > 0, ]
+centroids <- cbind(geoid10 = centroids$geoid10, centroids)
+centroids <- st_transform(centroids, "+init=epsg:4326")
 centroids$latlong <- paste0(centroids$Y, ",", centroids$X)
 
+centroids_final <- as.data.frame(st_coordinates(centroids))
+centroids_final <- cbind(centroids_final, geoid10 = centroids$geoid10)
+
+centroids_final$latlong <- paste0(centroids_final$Y, ",", centroids_final$X)
+
 odmtx <- expand.grid(
-  list(origins = centroids$latlong, 
-       destinations = centroids$latlong),
+  list(origins = centroids_final$latlong, 
+       destinations = centroids_final$latlong),
        stringsAsFactors = FALSE)
 
 total <- nrow(odmtx) # set number of records
@@ -82,13 +120,12 @@ for (i in 1:total) {
     )
   # If response is OK update dataframe
   if (response$errorId == "OK") {
-    centroids[i, "status"] <- response$errorId
-    centroids[i, "duration"] <- response$itineraries$duration
-    centroids[i, "waitingtime"] <- response$itineraries$waitingTime
-    centroids[i, "transfers"] <-response$itineraries$transfers
+    odmtx[i, "status"] <- response$errorId
+    odmtx[i, "duration"] <- response$itineraries$duration
+    odmtx[i, "waitingtime"] <- response$itineraries$waitingTime
+    odmtx[i, "transfers"] <-response$itineraries$transfers
   } else {
     # record error
-    centroids[i, "status"] <- response$errorId
+    odmtx[i, "status"] <- response$errorId
   }
 }
-
