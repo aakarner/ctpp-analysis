@@ -55,37 +55,6 @@ monetdb.read.csv(con,
                  nrow.check = 200000,
                  lower.case.names = TRUE)
 
-# This commented chunk below could be used to generate a table in the databse
-# representing a subset of desired geographies. 
-# Most of the subsets will be small, though, and can be created as needed 
-# on the fly with appropriate queries and data wrangling techniques.
-
-# Get required subset of the residential geography crosswalk
-# To extract rows for Harris County, TX
-# dbSendQuery(
-#   con, "
-#   CREATE TABLE harrisres AS
-#   SELECT lookupres.geoid, st, cty, tr, lineno, est, se FROM a102106
-#   INNER JOIN lookupres ON
-#   a102106.geoid = lookupres.geoid
-#   WHERE sumlevel = 'C11' AND
-#   st = '48' AND
-#   cty = '201'")
-# 
-# # Create a standard census geoid
-# dbSendQuery(
-#   con, "
-#   ALTER TABLE harrisres
-#   ADD COLUMN geoid10 char(11)")
-# 
-# dbSendQuery(
-#   con, "
-#   UPDATE harrisres
-#   SET geoid10 = st || cty || tr") # Double pipe concatenates multiple strings
-# 
-# dbRemoveTable(con, "harrisres")
-# dbGetQuery(con, "SELECT * FROM harrisres LIMIT 15")
-
 # Table B102201 - Minority status by means of transportation (most detailed)
 b102201 <- read_csv("data/TX_2006thru2010_B102201.csv")
 names(b102201) <- tolower(names(b102201))

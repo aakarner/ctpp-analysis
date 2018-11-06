@@ -1,14 +1,28 @@
+# This script conducts some simple analysis on CTPP Part 1 data that were 
+# read into a Monet database in the 01 script.
+# Specifically, it pulls down mode share information for Harris County, TX and 
+# plots some choropleth maps. 
+
 library(DBI)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(tigris)
 
-# Connect to the local MonetDB
+# Connect to the local Monet database
 dbdir <- "monet_ctpp"
 con <- dbConnect(MonetDBLite::MonetDBLite(), dbdir)
 
-harris_res <- dbGetQuery(con, "SELECT * FROM harrisres")
+harris_res <- dbGetQuery(
+  con, 
+  "SELECT lookupres.geoid, st, cty, tr, lineno, est, se FROM a102106
+  INNER JOIN lookupres ON
+  a102106.geoid = lookupres.geoid
+  WHERE sumlevel = 'C11' AND
+  st = '48' AND
+  cty = '201'")
+                         
+harris_res$geoid10 <- paste0(harris_res$st, harris_res$cty, harris_res$tr)
 
 # Get "lineno" information from the table shell
 mode_shares_res <- dbGetQuery(
@@ -36,6 +50,6 @@ tracts_wgeo <- inner_join(tracts_harris, harris_res_wide,
                             by = c("GEOID" = "geoid10"))
 
 ggplot() + geom_sf(data = tracts_wgeo, aes(fill = transhare))
-ggplot() + geom_sf(data = tracts_wgeo, aes(fill = dashare)) + coord_sf(crs = st_crs(2278))
+ggplot() + geom_sf(data = tracts_wgeo, aes(fill = dashare))
 
 dbDisconnect(con, shutdown = TRUE)
