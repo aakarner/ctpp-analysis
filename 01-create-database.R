@@ -1,11 +1,13 @@
+# This script creates a Monet database and populates it with the tables needed 
+# to generate mode- and race-specific origin-destination flow matrices. 
+
 library(DBI)
 library(MonetDBLite)
 library(readr)
 library(tidyr)
 library(dplyr)
-library(sf)
 
-# Create a local Monet database
+# Create a local in-memory Monet database to store CTPP data 
 dbdir <- "monet_ctpp"
 con <- dbConnect(MonetDBLite::MonetDBLite(), dbdir)
 
@@ -15,16 +17,16 @@ con <- dbConnect(MonetDBLite::MonetDBLite(), dbdir)
 # due to an encoding issue. Best solution is to read them first into R and then
 # into the database using dbWriteTable().
 
-lookup_res <- read_delim("lookup tables/acs_2006thru2010_ctpp_res_geo.txt",
+lookup_res <- read_delim("lookup_tables/acs_2006thru2010_ctpp_res_geo.txt",
                          delim = "|",
                          guess_max = 200000)
 
-lookup_pow <- read_delim("lookup tables/acs_2006thru2010_ctpp_pow_geo.txt",
+lookup_pow <- read_delim("lookup_tables/acs_2006thru2010_ctpp_pow_geo.txt",
                          delim = "|",
                          guess_max = 200000)
 
 
-table_shell <- read_delim("lookup tables/acs_2006thru2010_ctpp_table_shell.txt",
+table_shell <- read_delim("lookup_tables/acs_2006thru2010_ctpp_table_shell.txt",
                          delim = "|",
                          guess_max = 200000)
 
@@ -54,7 +56,7 @@ monetdb.read.csv(con,
                  lower.case.names = TRUE)
 
 # This commented chunk below could be used to generate a table in the databse
-# representing a subset of desire geographies. 
+# representing a subset of desired geographies. 
 # Most of the subsets will be small, though, and can be created as needed 
 # on the fly with appropriate queries and data wrangling techniques.
 
@@ -100,13 +102,20 @@ names(b202200) <- tolower(names(b202200))
 dbWriteTable(con, "b202200", b202200)
 rm(b202200)
 
+# Table A202103 - Earnings in the past 12 months
+a202103 <- read_csv("data/TX_2006thru2010_A202103.csv")
+names(a202103) <- tolower(names(a202103))
+
+dbWriteTable(con, "a202103", a202103)
+rm(a202103)
+
 # Required tables for Part 3 - Flow --------------------------------------------
 
 # Part 3 tables cannot be read directly into the database using 
 # monetdb.read.csv(). The "source" column throws an error because it contains 
 # text in the final row. In general that column seems a little strange. 
 
-# Instead, read required tables directly into R and use dbWriteTable() instead.
+# Instead, read required tables directly into R and use dbWriteTable().
 
 # Table A302103 - Means of transportation
 # Table B302105 - Minority status
