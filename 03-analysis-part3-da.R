@@ -1,6 +1,7 @@
-# This script creates synthetic journey-to-work flows by mode cross-tabulated 
-# with race/ethnicity using iterative proportional fitting. These tables do 
-# not exist in the public distribution of the CTPP so must be created. 
+# This script creates synthetic journey-to-work flows for drive alone
+# cross-tabulated with race/ethnicity using iterative proportional fitting. 
+# These tables do not exist in the public distribution of the CTPP so must be 
+# created. 
 
 library(DBI)
 library(dplyr)
