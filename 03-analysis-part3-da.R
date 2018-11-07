@@ -1,11 +1,12 @@
+# This script creates synthetic journey-to-work flows by mode cross-tabulated 
+# with race/ethnicity using iterative proportional fitting. These tables do 
+# not exist in the public distribution of the CTPP so must be created. 
+
 library(DBI)
 library(dplyr)
 library(tidyr)
 library(abind)
 library(mipfp)
-
-# Goal of this section is to create synthetic journey-to-work flows 
-# by mode cross-tabulated with race/ethnicity
 
 dbdir <- "monet_ctpp"
 con <- dbConnect(MonetDBLite::MonetDBLite(), dbdir)
