@@ -1,4 +1,17 @@
-## Drive alone
+# This script creates synthetic journey-to-work flows for public transit
+# cross-tabulated with race/ethnicity using iterative proportional fitting. 
+# These tables do not exist in the public distribution of the CTPP so must be 
+# created. 
+
+library(DBI)
+library(dplyr)
+library(tidyr)
+library(abind)
+library(mipfp)
+
+dbdir <- "monet_ctpp"
+con <- dbConnect(MonetDBLite::MonetDBLite(), dbdir)
+
 
 # Construct consistent (wide) data for Parts 1-3 so that we can generate
 # a consistent set of Os and Ds
