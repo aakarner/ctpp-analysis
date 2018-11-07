@@ -33,7 +33,7 @@ TX
 ```
 
 Understanding the contents of each table within a state's directory requires using the 2006-2010_ctpp_lookup.tar.gz file. It's quite important and contains a number of lookup tables, including:
-* **ReadMe.xlsx**: 
+* **ReadMe.xlsx**: Obvious.
 * **2006-2010_CTPP_Documentation for AASHTO-Oct 22 2013.xlsx**: This file contains information identifying the content of each table listed within the state directory and provides further instructions for data access. In contains a number of worksheets:
   * Part1Tables: Describes all tables that contain Part 1 (place of residence) information.
   * Part2Tables: Describes all tables that contain Part 2 (place of work) information. 
@@ -47,12 +47,12 @@ Understanding the contents of each table within a state's directory requires usi
   
 The data tables within each part contain consistent headings. 
 
-The following text files are all pipe-delimited (y tho?):
+The following text files are all pipe-delimited and can be joined with the raw data tables to add geographic information and variable descriptors:
 
-* **acs_2006thru2010_ctpp_table_shell.txt**: This file includes variable names cross-referenced using the table name (TBLID) and line number (LINENO).
+* **acs_2006thru2010_ctpp_table_shell.txt**: This file includes variable names and descriptions cross-referenced using the table name (TBLID) and line number (LINENO).
 * **acs_2006thru2010_ctpp_flow_geo.txt**: This file includes a single GEOID column. Near as I can tell, it includes every *possible* flow between all units of geography for which flows are defined (see the "Geog" worksheet in 2006-2010_CTPP_Documentation for AASHTO-Oct 22 2013.xlsx). This means that a row is included even if there's no observed commuter flow.
-* **acs_2006thru2010_ctpp_res_geo.txt**
-* **acs_2006thru2010_ctpp_pow_geo.txt**
+* **acs_2006thru2010_ctpp_res_geo.txt**: Join this table with any part 1 table on geoid to obtain detailed geographic information, including summary levels.
+* **acs_2006thru2010_ctpp_pow_geo.txt**: Join this table with any part 2 table on geoid to obtain detailed geographic information, including summary levels.
 
 I'm still trying to work out what's included in the flow lookup table, but the place-of-work and place-of-residence lookups seem to be what you'd expect -- a GEOID cross-referenced with its higher-level geographic information. 
 

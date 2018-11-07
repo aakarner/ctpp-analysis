@@ -39,9 +39,9 @@ names(lookup_res)[names(lookup_res) == "year"] <- "year_"
 names(lookup_pow)[names(lookup_pow) == "year"] <- "year_"
 
 # Write the tables to the db
-dbWriteTable(con, "lookupres", lookup_res)
-dbWriteTable(con, "lookuppow", lookup_pow)
-dbWriteTable(con, "tableshell", table_shell)
+dbWriteTable(con, "lookupres", lookupres)
+dbWriteTable(con, "lookuppow", lookuppow)
+dbWriteTable(con, "tableshell", tableshell)
 
 # Required tables for Part 1 - Place of residence ------------------------------
 
