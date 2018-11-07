@@ -1,3 +1,5 @@
+# This script plots some sample maps using the CTPP data.
+
 library(tigris)
 library(viridis)
 library(sf)
