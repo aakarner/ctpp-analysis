@@ -1,7 +1,7 @@
-# This script conducts some simple analysis on CTPP Part 1 data that were 
+# This script generates a couple simple maps from the CTPP Part 1 data that were 
 # read into a Monet database in the 01 script.
 # Specifically, it pulls down mode share information for Harris County, TX and 
-# plots some choropleth maps. 
+# plots a couple choropleth maps. 
 
 library(DBI)
 library(ggplot2)
